@@ -2,8 +2,19 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const https = require('https');
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+
+// Load environment variables
+dotenv.config();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('Failed to connect to MongoDB:', err));
 
 // Import routes
 const uploadRouter = require('./routes/uploadRouter');

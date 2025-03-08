@@ -3,6 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const router = express.Router();
+const File = require('../models/File');
 
 // Configure multer storage
 const storage = multer.diskStorage({
@@ -30,24 +31,51 @@ const upload = multer({
 });
 
 // Render upload form
-router.get('/upload', (req, res) => {
-  res.render('upload', { message: null });
+router.get('/upload', async (req, res) => {
+  try {
+    // Get list of files from database
+    const files = await File.find().sort({ uploadDate: -1 });
+    res.render('upload', { message: null, files });
+  } catch (error) {
+    console.error('Error fetching files:', error);
+    res.render('upload', { message: 'Error fetching files', files: [] });
+  }
 });
 
 // Handle file upload
-router.post('/upload', upload.single('file'), (req, res) => {
+router.post('/upload', upload.single('file'), async (req, res) => {
   if (!req.file) {
-    return res.render('upload', { message: 'Error: No file selected!' });
+    return res.render('upload', { message: 'Error: No file selected!', files: [] });
   }
   
-  // Get list of files in uploads directory for display
-  const uploadedFiles = fs.readdirSync(path.join(__dirname, '../uploads'));
-  
-  res.render('upload', { 
-    message: 'File uploaded successfully!', 
-    file: req.file,
-    files: uploadedFiles
-  });
+  try {
+    // Save file information to database
+    const fileRecord = new File({
+      originalName: req.file.originalname,
+      filename: req.file.filename,
+      mimetype: req.file.mimetype,
+      size: req.file.size,
+      path: req.file.path
+    });
+    
+    await fileRecord.save();
+    
+    // Get updated list of files from database
+    const files = await File.find().sort({ uploadDate: -1 });
+    
+    res.render('upload', { 
+      message: 'File uploaded successfully!', 
+      file: req.file,
+      files: files
+    });
+  } catch (error) {
+    console.error('Error saving file to database:', error);
+    res.render('upload', { 
+      message: 'File uploaded but failed to save to database', 
+      file: req.file,
+      files: []
+    });
+  }
 });
 
 module.exports = router; 

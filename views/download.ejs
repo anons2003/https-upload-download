@@ -21,8 +21,15 @@
         <h2>Available Files:</h2>
         <% files.forEach(function(file) { %>
           <div class="file-item">
-            <span class="file-name"><%= file %></span>
-            <a href="/download/<%= file %>" class="download-btn">Download</a>
+            <div class="file-info">
+              <span class="file-name"><%= file.originalName %></span>
+              <div class="file-meta">
+                <span class="file-type"><%= file.mimetype %></span>
+                <span class="file-size"><%= (file.size / 1024).toFixed(2) %> KB</span>
+                <span class="file-date">Uploaded: <%= new Date(file.uploadDate).toLocaleString() %></span>
+              </div>
+            </div>
+            <a href="/download/<%= file.filename %>" class="download-btn">Download</a>
           </div>
         <% }); %>
       </div>
