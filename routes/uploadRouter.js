@@ -5,14 +5,16 @@ const fs = require('fs');
 const router = express.Router();
 const File = require('../models/File');
 
+// Ensure uploads directory exists
+const uploadPath = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadPath)) {
+  fs.mkdirSync(uploadPath, { recursive: true });
+  console.log('Created uploads directory');
+}
+
 // Configure multer storage
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
-    // Ensure uploads directory exists
-    const uploadPath = path.join(__dirname, '../uploads');
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
     cb(null, uploadPath);
   },
   filename: function(req, file, cb) {

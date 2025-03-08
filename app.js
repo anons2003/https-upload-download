@@ -1,7 +1,6 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const https = require('https');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 
@@ -38,30 +37,15 @@ app.get('/', (req, res) => {
   res.render('index');
 });
 
-// Start server
+// Start server - Simplified for Render.com deployment
 try {
-  // Check if HTTPS certificates exist, if not use HTTP
-  if (fs.existsSync('./key.pem') && fs.existsSync('./cert.pem')) {
-    // HTTPS server
-    const options = {
-      key: fs.readFileSync('./key.pem'),
-      cert: fs.readFileSync('./cert.pem')
-    };
-    
-    https.createServer(options, app).listen(PORT, () => {
-      console.log(`HTTPS Server running on port ${PORT}`);
-    });
-  } else {
-    // HTTP server fallback
-    app.listen(PORT, () => {
-      console.log(`HTTP Server running on port ${PORT}`);
-      console.log('HTTPS certificates not found. Running in HTTP mode.');
-    });
-  }
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port ${PORT}`);
+  });
 } catch (error) {
   console.error('Server startup error:', error);
-  // HTTP server fallback
-  app.listen(PORT, () => {
-    console.log(`HTTP Server running on port ${PORT} (fallback due to error)`);
+  // Fallback if there's an error
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port ${PORT} (fallback due to error)`);
   });
 } 
